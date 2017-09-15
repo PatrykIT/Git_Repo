@@ -13,7 +13,7 @@ def Ustaw_Siatke(rozmiar_siatki, start, numer_min):
     for i, j in miny:
         pusta_siatka[i][j] = 'X'
 
-    siatka = getnumbers(pusta_siatka)
+    siatka = pobierz_numery(pusta_siatka)
 
     return (siatka, miny)
 
@@ -44,176 +44,177 @@ def Pokaz_Siatke(siatka):
 
 
 def pobierz_losowa_komorke(grid):
-    gridsize = len(grid)
+    rozmiar_siatki = len(grid)
 
-    a = random.randint(0, gridsize - 1)
-    b = random.randint(0, gridsize - 1)
+    a = random.randint(0, rozmiar_siatki - 1)
+    b = random.randint(0, rozmiar_siatki - 1)
 
     return (a, b)
 
 
-def getneighbors(grid, rowno, colno):
-    gridsize = len(grid)
-    neighbors = []
+def pobierz_sasiadow(siatka, number_rzedu, numer_kolumny):
+    rozmiar_siatki = len(siatka)
+    sasiedzi = []
 
     for i in range(-1, 2):
         for j in range(-1, 2):
             if i == 0 and j == 0:
                 continue
-            elif -1 < (rowno + i) < gridsize and -1 < (colno + j) < gridsize:
-                neighbors.append((rowno + i, colno + j))
+            elif -1 < (number_rzedu + i) < rozmiar_siatki and -1 < (numer_kolumny + j) < rozmiar_siatki:
+                sasiedzi.append((number_rzedu + i, numer_kolumny + j))
 
-    return neighbors
-
-
-def pobierz_miny(grid, start, numberofmines):
-    mines = []
-    neighbors = getneighbors(grid, *start)
-
-    for i in range(numberofmines):
-        cell = pobierz_losowa_komorke(grid)
-        while cell == start or cell in mines or cell in neighbors:
-            cell = pobierz_losowa_komorke(grid)
-        mines.append(cell)
-
-    return mines
+    return sasiedzi
 
 
-def getnumbers(grid):
-    for rowno, row in enumerate(grid):
-        for colno, cell in enumerate(row):
-            if cell != 'X':
-                # Gets the values of the neighbors
-                values = [grid[r][c] for r, c in getneighbors(grid,
-                                                              rowno, colno)]
+def pobierz_miny(siatka, start, liczba_min):
+    miny = []
+    sasiedzi = pobierz_sasiadow(siatka, *start)
 
-                # Counts how many are mines
-                grid[rowno][colno] = str(values.count('X'))
+    for i in range(liczba_min):
+        komorka = pobierz_losowa_komorke(siatka)
+        while komorka == start or komorka in miny or komorka in sasiedzi:
+            komorka = pobierz_losowa_komorke(siatka)
+        miny.append(komorka)
 
-    return grid
+    return miny
 
 
-def showcells(grid, currgrid, rowno, colno):
-    # Exit function if the cell was already shown
-    if currgrid[rowno][colno] != ' ':
+def pobierz_numery(siatka):
+    for numer_rzedu, rzad in enumerate(siatka):
+        for numer_kolumny, komorka in enumerate(rzad):
+            if komorka != 'X':
+                # Pobierz wartosci sasiednich komorek
+                wartosci = [siatka[r][c] for r, c in pobierz_sasiadow(siatka,
+                                                                    numer_rzedu, numer_kolumny)]
+
+                # Policz jak wiele jest min
+                siatka[numer_rzedu][numer_kolumny] = str(wartosci.count('X'))
+
+    return siatka
+
+
+def pokaz_komorki(siatka, obecna_siatka, numer_rzedu, numer_kolumny):
+    # Wyjdz z funkcji jesli komorka jest juz pokazana
+    if obecna_siatka[numer_rzedu][numer_kolumny] != ' ':
         return
 
-    # Show current cell
-    currgrid[rowno][colno] = grid[rowno][colno]
+    # Pokaz obecna komorke
+    obecna_siatka[numer_rzedu][numer_kolumny] = siatka[numer_rzedu][numer_kolumny]
 
-    # Get the neighbors if the cell is empty
-    if grid[rowno][colno] == '0':
-        for r, c in getneighbors(grid, rowno, colno):
-            # Repeat function for each neighbor that doesn't have a flag
-            if currgrid[r][c] != 'F':
-                showcells(grid, currgrid, r, c)
-
-
-def playagain():
-    choice = input('Play again? (y/n): ')
-
-    return choice.lower() == 'y'
+    # Pobierz sasiadow jesli komorka jest pusta
+    if siatka[numer_rzedu][numer_kolumny] == '0':
+        for r, c in pobierz_sasiadow(siatka, numer_rzedu, numer_kolumny):
+            # Powtorz funkcje dla kazdego sasiada ktory nie ma flagi
+            if obecna_siatka[r][c] != 'F':
+                pokaz_komorki(siatka, obecna_siatka, r, c)
 
 
-def parseinput(inputstring, gridsize, helpmessage):
-    cell = ()
-    flag = False
-    message = "Invalid cell. " + helpmessage
+def zagraj_ponownie():
+    wybor = input('Zagrasz ponownie? (y/n): ')
 
-    pattern = r'([a-{}])([0-9]+)(f?)'.format(ascii_lowercase[gridsize - 1])
-    validinput = re.match(pattern, inputstring)
-
-    if inputstring == 'help':
-        message = helpmessage
-
-    elif validinput:
-        rowno = int(validinput.group(2)) - 1
-        colno = ascii_lowercase.index(validinput.group(1))
-        flag = bool(validinput.group(3))
-
-        if -1 < rowno < gridsize:
-            cell = (rowno, colno)
-            message = ''
-
-    return {'cell': cell, 'flag': flag, 'message': message}
+    return wybor.lower() == 'y'
 
 
-def playgame():
-    gridsize = 9
-    numberofmines = 10
+def parsuj_dane_wejsciowe(wejsciowy_string, rozmiar_siatki, pomocna_wiadomosc):
+    komorka = ()
+    flaga = False
+    wiadomosc = "Niepoprawna komorka. " + pomocna_wiadomosc
 
-    currgrid = [[' ' for i in range(gridsize)] for i in range(gridsize)]
+    wzorzec = r'([a-{}])([0-9]+)(f?)'.format(ascii_lowercase[rozmiar_siatki - 1])
+    poprawny_string = re.match(wzorzec, wejsciowy_string)
 
-    grid = []
-    flags = []
-    starttime = 0
+    if wejsciowy_string == 'help':
+        wiadomosc = pomocna_wiadomosc
 
-    helpmessage = ("Type the column followed by the row (eg. a5). "
-                   "To put or remove a flag, add 'f' to the cell (eg. a5f).")
+    elif poprawny_string:
+        numer_rzedu = int(poprawny_string.group(2)) - 1
+        numer_kolumny = ascii_lowercase.index(poprawny_string.group(1))
+        flaga = bool(poprawny_string.group(3))
 
-    Pokaz_Siatke(currgrid)
-    print(helpmessage + " Type 'help' to show this message again.\n")
+        if -1 < numer_rzedu < rozmiar_siatki:
+            komorka = (numer_rzedu, numer_kolumny)
+            wiadomosc = ''
+
+    return {'komorka': komorka, 'flaga': flaga, 'wiadomosc': wiadomosc}
+
+
+def zagraj():
+    rozmiar_siatki = 9
+    numer_min = 10
+
+    obecna_siatka = [[' ' for i in range(rozmiar_siatki)] for i in range(rozmiar_siatki)]
+
+    siatka = []
+    flagi = []
+    start_czasu = 0
+
+    pomocna_wiadomosc = ("Wpisz kolumne a nastepnie numer rzedu (np. b1). "
+                   "Aby postawic lub usunac flage, dodaj 'f' do komorki (np. b1f)")
+
+    Pokaz_Siatke(obecna_siatka)
+    print(pomocna_wiadomosc + " Wpisz 'help' aby pokazac ta wiadomosc ponownie.\n")
 
     while True:
-        minesleft = numberofmines - len(flags)
-        prompt = input('Enter the cell ({} mines left): '.format(minesleft))
-        result = parseinput(prompt, gridsize, helpmessage + '\n')
+        pozostalo_min = numer_min - len(flagi)
+        komenda_popros = input('Podaj komorke ({} min zostalo): '.format(pozostalo_min))
 
-        message = result['message']
-        cell = result['cell']
+        wynik = parsuj_dane_wejsciowe(komenda_popros, rozmiar_siatki, pomocna_wiadomosc + '\n')
 
-        if cell:
+        wiadomosc = wynik['wiadomosc']
+        komorka = wynik['komorka']
+
+        if komorka:
             print('\n\n')
-            rowno, colno = cell
-            currcell = currgrid[rowno][colno]
-            flag = result['flag']
+            numer_rzedu, numer_kolumny = komorka
+            obecna_komorka = obecna_siatka[numer_rzedu][numer_kolumny]
+            flaga = wynik['flaga']
 
-            if not grid:
-                grid, mines = Ustaw_Siatke(gridsize, cell, numberofmines)
-            if not starttime:
-                starttime = time.time()
+            if not siatka:
+                siatka, miny = Ustaw_Siatke(rozmiar_siatki, komorka, numer_min)
+            if not start_czasu:
+                start_czasu = time.time()
 
-            if flag:
-                # Add a flag if the cell is empty
-                if currcell == ' ':
-                    currgrid[rowno][colno] = 'F'
-                    flags.append(cell)
-                # Remove the flag if there is one
-                elif currcell == 'F':
-                    currgrid[rowno][colno] = ' '
-                    flags.remove(cell)
+            if flaga:
+                # Dodaj flage jesli komorka jest pusta
+                if obecna_komorka == ' ':
+                    obecna_siatka[numer_rzedu][numer_kolumny] = 'F'
+                    flagi.append(komorka)
+                # Usun flage jesli flaga jest juz ustawiona
+                elif obecna_komorka == 'F':
+                    obecna_siatka[numer_rzedu][numer_kolumny] = ' '
+                    flagi.remove(komorka)
                 else:
-                    message = 'Cannot put a flag there'
+                    wiadomosc = 'Nie mozna wstawic tu flagi'
 
-            # If there is a flag there, show a message
-            elif cell in flags:
-                message = 'There is a flag there'
+            # Jesli jest tu flaga, pokaz wiadomosc
+            elif komorka in flagi:
+                wiadomosc = 'Tu jest flaga'
 
-            elif grid[rowno][colno] == 'X':
-                print('Game Over\n')
-                Pokaz_Siatke(grid)
-                if playagain():
-                    playgame()
+            elif siatka[numer_rzedu][numer_kolumny] == 'X':
+                print('Przegrales.\n')
+                Pokaz_Siatke(siatka)
+                if zagraj_ponownie():
+                    zagraj()
                 return
 
-            elif currcell == ' ':
-                showcells(grid, currgrid, rowno, colno)
+            elif obecna_komorka == ' ':
+                pokaz_komorki(siatka, obecna_siatka, numer_rzedu, numer_kolumny)
 
             else:
-                message = "That cell is already shown"
+                wiadomosc = "Ta komorka jest juz odkryta"
 
-            if set(flags) == set(mines):
-                minutes, seconds = divmod(int(time.time() - starttime), 60)
+            if set(flagi) == set(miny):
+                minutes, seconds = divmod(int(time.time() - start_czasu), 60)
                 print(
-                    'You Win. '
-                    'It took you {} minutes and {} seconds.\n'.format(minutes,
+                    'Wygales! '
+                    'Trwalo to {} minut and {} sekund.\n'.format(minutes,
                                                                       seconds))
-                Pokaz_Siatke(grid)
-                if playagain():
-                    playgame()
+                Pokaz_Siatke(siatka)
+                if zagraj_ponownie():
+                    zagraj()
                 return
 
-        Pokaz_Siatke(currgrid)
-        print(message)
+        Pokaz_Siatke(obecna_siatka)
+        print(wiadomosc)
 
-playgame()
+zagraj()
