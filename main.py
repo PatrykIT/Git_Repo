@@ -5,45 +5,45 @@ import time
 from string import ascii_lowercase
 
 
-def Ustaw_Siatke(gridsize, start, numberofmines):
-    emptygrid = [['0' for i in range(gridsize)] for i in range(gridsize)]
+def Ustaw_Siatke(rozmiar_siatki, start, numer_min):
+    pusta_siatka = [['0' for i in range(rozmiar_siatki)] for i in range(rozmiar_siatki)]
 
-    mines = getmines(emptygrid, start, numberofmines)
+    miny = pobierz_miny(pusta_siatka, start, numer_min)
 
-    for i, j in mines:
-        emptygrid[i][j] = 'X'
+    for i, j in miny:
+        pusta_siatka[i][j] = 'X'
 
-    grid = getnumbers(emptygrid)
+    siatka = getnumbers(pusta_siatka)
 
-    return (grid, mines)
+    return (siatka, miny)
 
 
-def showgrid(grid):
-    gridsize = len(grid)
+def Pokaz_Siatke(siatka):
+    rozmiar_siatki = len(siatka)
 
-    horizontal = '   ' + (4 * gridsize * '-') + '-'
+    poziomo = '   ' + (4 * rozmiar_siatki * '-') + '-'
 
-    # Print top column letters
-    toplabel = '     '
+    # Wypisz litery u gory 'a b c d e f g h i'
+    najwyzsza_kolumna = '     '
 
-    for i in ascii_lowercase[:gridsize]:
-        toplabel = toplabel + i + '   '
+    for i in ascii_lowercase[:rozmiar_siatki]:
+        najwyzsza_kolumna = najwyzsza_kolumna + i + '   '
 
-    print(toplabel + '\n' + horizontal)
+    print(najwyzsza_kolumna + '\n' + poziomo)
 
-    # Print left row numbers
-    for idx, i in enumerate(grid):
-        row = '{0:2} |'.format(idx + 1)
+    # Wypisz liczby po lewej stronie siatki
+    for idx, i in enumerate(siatka):
+        rzad = '{0:2} |'.format(idx + 1)
 
         for j in i:
-            row = row + ' ' + j + ' |'
+            rzad = rzad + ' ' + j + ' |'
 
-        print(row + '\n' + horizontal)
+        print(rzad + '\n' + poziomo)
 
     print('')
 
 
-def getrandomcell(grid):
+def pobierz_losowa_komorke(grid):
     gridsize = len(grid)
 
     a = random.randint(0, gridsize - 1)
@@ -66,14 +66,14 @@ def getneighbors(grid, rowno, colno):
     return neighbors
 
 
-def getmines(grid, start, numberofmines):
+def pobierz_miny(grid, start, numberofmines):
     mines = []
     neighbors = getneighbors(grid, *start)
 
     for i in range(numberofmines):
-        cell = getrandomcell(grid)
+        cell = pobierz_losowa_komorke(grid)
         while cell == start or cell in mines or cell in neighbors:
-            cell = getrandomcell(grid)
+            cell = pobierz_losowa_komorke(grid)
         mines.append(cell)
 
     return mines
@@ -151,7 +151,7 @@ def playgame():
     helpmessage = ("Type the column followed by the row (eg. a5). "
                    "To put or remove a flag, add 'f' to the cell (eg. a5f).")
 
-    showgrid(currgrid)
+    Pokaz_Siatke(currgrid)
     print(helpmessage + " Type 'help' to show this message again.\n")
 
     while True:
@@ -191,7 +191,7 @@ def playgame():
 
             elif grid[rowno][colno] == 'X':
                 print('Game Over\n')
-                showgrid(grid)
+                Pokaz_Siatke(grid)
                 if playagain():
                     playgame()
                 return
@@ -208,12 +208,12 @@ def playgame():
                     'You Win. '
                     'It took you {} minutes and {} seconds.\n'.format(minutes,
                                                                       seconds))
-                showgrid(grid)
+                Pokaz_Siatke(grid)
                 if playagain():
                     playgame()
                 return
 
-        showgrid(currgrid)
+        Pokaz_Siatke(currgrid)
         print(message)
 
 playgame()
