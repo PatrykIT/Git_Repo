@@ -36,14 +36,13 @@ class Siatka:
 
     # TODO: convert siatka -> self (if possible)
     def Pokaz_Siatke(self, siatka):
-        rozmiar_siatki = len(siatka)
 
-        poziomo = '   ' + (4 * rozmiar_siatki * '-') + '-'
+        poziomo = '   ' + (4 * self.rozmiar_siatki * '-') + '-'
 
         # Wypisz litery u gory 'a b c d e f g h i'
         najwyzsza_kolumna = '     '
 
-        for i in ascii_lowercase[:rozmiar_siatki]:
+        for i in ascii_lowercase[:self.rozmiar_siatki]:
             najwyzsza_kolumna = najwyzsza_kolumna + i + '   '
 
         print(najwyzsza_kolumna + '\n' + poziomo)
@@ -163,7 +162,7 @@ class Gra:
 
         obecna_siatka = [[' ' for i in range(rozmiar_siatki)] for i in range(rozmiar_siatki)]
 
-        siatka = []
+        plansza = []
         start_czasu = 0
 
         pomocna_wiadomosc = ("Wpisz kolumne a nastepnie numer rzedu (np. b1). "
@@ -187,8 +186,8 @@ class Gra:
                 obecna_komorka = obecna_siatka[numer_rzedu][numer_kolumny]
                 flaga = wynik['flaga']
 
-                if not siatka:
-                    siatka, miny = siatka_obiekt.Ustaw_Siatke(komorka)
+                if not plansza:
+                    plansza, miny = siatka_obiekt.Ustaw_Siatke(komorka)
                 if not start_czasu:
                     start_czasu = time.time()
 
@@ -208,15 +207,15 @@ class Gra:
                 elif komorka in siatka_obiekt.flagi:
                     wiadomosc = 'Tu jest flaga'
 
-                elif siatka[numer_rzedu][numer_kolumny] == 'X':
+                elif plansza[numer_rzedu][numer_kolumny] == 'X':
                     print('Przegrales.\n')
-                    siatka_obiekt.Pokaz_Siatke(siatka)
+                    siatka_obiekt.Pokaz_Siatke(plansza)
                     if self.zagraj_ponownie():
                         self.zagraj()
                     return
 
                 elif obecna_komorka == ' ':
-                    siatka_obiekt.pokaz_komorki(siatka, obecna_siatka, numer_rzedu, numer_kolumny)
+                    siatka_obiekt.pokaz_komorki(plansza, obecna_siatka, numer_rzedu, numer_kolumny)
 
                 else:
                     wiadomosc = "Ta komorka jest juz odkryta"
@@ -227,7 +226,7 @@ class Gra:
                         'Wygales! '
                         'Trwalo to {} minut and {} sekund.\n'.format(minutes,
                                                                           seconds))
-                    siatka_obiekt.Pokaz_Siatke(siatka)
+                    siatka_obiekt.Pokaz_Siatke(plansza)
                     if self.zagraj_ponownie():
                         self.zagraj()
                     return
