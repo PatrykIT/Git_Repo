@@ -9,7 +9,7 @@ class Siatka:
     'Klasa zarzadza gra. Jest to siatka ktora przetrzymuje informacje co znajduje sie na planszy'
 
     rozmiar_siatki = 9
-    #miny = []
+    miny = []
     numer_min = 10
     #sasiednie_komorki = []
     plansza = []
@@ -33,8 +33,7 @@ class Siatka:
 
         siatka = self.pobierz_numery(pusta_siatka)
         self.plansza = siatka
-
-        return miny
+        self.miny = miny
 
     # TODO: convert siatka -> self (if possible)
     def Pokaz_Siatke(self, siatka):
@@ -188,7 +187,7 @@ class Gra:
                 flaga = wynik['flaga']
 
                 if not siatka_obiekt.plansza:
-                    miny = siatka_obiekt.Ustaw_Siatke(komorka)
+                    siatka_obiekt.Ustaw_Siatke(komorka)
                 if not start_czasu:
                     start_czasu = time.time()
 
@@ -221,7 +220,7 @@ class Gra:
                 else:
                     wiadomosc = "Ta komorka jest juz odkryta"
 
-                if set(siatka_obiekt.flagi) == set(miny):
+                if set(siatka_obiekt.flagi) == set(siatka_obiekt.miny):
                     minutes, seconds = divmod(int(time.time() - start_czasu), 60)
                     print(
                         'Wygales! '
