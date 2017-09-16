@@ -11,7 +11,6 @@ class Siatka:
     rozmiar_siatki = 9
     miny = []
     numer_min = 10
-    #sasiednie_komorki = []
     plansza = []
     flagi = []
 
@@ -26,18 +25,16 @@ class Siatka:
     def Ustaw_Siatke(self, start):
         pusta_siatka = [['0' for i in range(self.rozmiar_siatki)] for i in range(self.rozmiar_siatki)]
 
-        miny = self.pobierz_miny(pusta_siatka, start, self.numer_min)
+        self.ustaw_miny(pusta_siatka, start, self.numer_min)
 
-        for i, j in miny:
+        for i, j in self.miny:
             pusta_siatka[i][j] = 'X'
 
         siatka = self.pobierz_numery(pusta_siatka)
         self.plansza = siatka
-        self.miny = miny
 
     # TODO: convert siatka -> self (if possible)
     def Pokaz_Siatke(self, siatka):
-
         poziomo = '   ' + (4 * self.rozmiar_siatki * '-') + '-'
 
         # Wypisz litery u gory 'a b c d e f g h i'
@@ -81,17 +78,14 @@ class Siatka:
 
         return sasiednie_komorki
 
-    def pobierz_miny(self, siatka, start, liczba_min):
-        miny = []
+    def ustaw_miny(self, siatka, start, liczba_min):
         sasiednie_komorki = self.pobierz_sasiadow(siatka, *start)
 
         for i in range(liczba_min):
             komorka = self.pobierz_losowa_komorke(siatka)
-            while komorka == start or komorka in miny or komorka in sasiednie_komorki:
+            while komorka == start or komorka in self.miny or komorka in sasiednie_komorki:
                 komorka = self.pobierz_losowa_komorke(siatka)
-            miny.append(komorka)
-
-        return miny
+            self.miny.append(komorka)
 
     def pobierz_numery(self, siatka):
         for numer_rzedu, rzad in enumerate(siatka):
@@ -125,12 +119,6 @@ class Siatka:
 
 class Gra:
     'Klasa ktora zarzadza gra.'
-
-    def zagraj_ponownie(self):
-        wybor = input('Zagrasz ponownie? (y/n): ')
-
-        return wybor.lower() == 'y'
-
 
     def parsuj_dane_wejsciowe(self, wejsciowy_string, rozmiar_siatki, pomocna_wiadomosc):
         komorka = ()
@@ -210,8 +198,6 @@ class Gra:
                 elif siatka_obiekt.plansza[numer_rzedu][numer_kolumny] == 'X':
                     print('Przegrales.\n')
                     siatka_obiekt.Pokaz_Siatke(siatka_obiekt.plansza)
-                    if self.zagraj_ponownie():
-                        self.zagraj()
                     return
 
                 elif obecna_komorka == ' ':
@@ -227,8 +213,6 @@ class Gra:
                         'Trwalo to {} minut and {} sekund.\n'.format(minutes,
                                                                           seconds))
                     siatka_obiekt.Pokaz_Siatke(siatka_obiekt.plansza)
-                    if self.zagraj_ponownie():
-                        self.zagraj()
                     return
 
             siatka_obiekt.Pokaz_Siatke(obecna_siatka)
