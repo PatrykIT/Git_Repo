@@ -12,6 +12,7 @@ class Siatka:
     #miny = []
     numer_min = 10
     #sasiednie_komorki = []
+    flagi = []
 
     def get_rozmiar_siatki(self):
         return self.rozmiar_siatki
@@ -163,7 +164,6 @@ class Gra:
         obecna_siatka = [[' ' for i in range(rozmiar_siatki)] for i in range(rozmiar_siatki)]
 
         siatka = []
-        flagi = []
         start_czasu = 0
 
         pomocna_wiadomosc = ("Wpisz kolumne a nastepnie numer rzedu (np. b1). "
@@ -173,7 +173,7 @@ class Gra:
         print(pomocna_wiadomosc + " Wpisz 'help' aby pokazac ta wiadomosc ponownie.\n")
 
         while True:
-            pozostalo_min = numer_min - len(flagi)
+            pozostalo_min = numer_min - len(siatka_obiekt.flagi)
             komenda_popros = input('Podaj komorke ({} min zostalo): '.format(pozostalo_min))
 
             wynik = self.parsuj_dane_wejsciowe(komenda_popros, rozmiar_siatki, pomocna_wiadomosc + '\n')
@@ -196,16 +196,16 @@ class Gra:
                     # Dodaj flage jesli komorka jest pusta
                     if obecna_komorka == ' ':
                         obecna_siatka[numer_rzedu][numer_kolumny] = 'F'
-                        flagi.append(komorka)
+                        siatka_obiekt.flagi.append(komorka)
                     # Usun flage jesli flaga jest juz ustawiona
                     elif obecna_komorka == 'F':
                         obecna_siatka[numer_rzedu][numer_kolumny] = ' '
-                        flagi.remove(komorka)
+                        siatka_obiekt.flagi.remove(komorka)
                     else:
                         wiadomosc = 'Nie mozna wstawic tu flagi'
 
                 # Jesli jest tu flaga, pokaz wiadomosc
-                elif komorka in flagi:
+                elif komorka in siatka_obiekt.flagi:
                     wiadomosc = 'Tu jest flaga'
 
                 elif siatka[numer_rzedu][numer_kolumny] == 'X':
@@ -221,7 +221,7 @@ class Gra:
                 else:
                     wiadomosc = "Ta komorka jest juz odkryta"
 
-                if set(flagi) == set(miny):
+                if set(siatka_obiekt.flagi) == set(miny):
                     minutes, seconds = divmod(int(time.time() - start_czasu), 60)
                     print(
                         'Wygales! '
