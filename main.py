@@ -22,7 +22,7 @@ class Siatka:
 
     # TODO: def __init__ for assignment of all variables
 
-    def Ustaw_Siatke(self, start):
+    def stworz_plansze(self, start):
         pusta_siatka = [['0' for i in range(self.rozmiar_siatki)] for i in range(self.rozmiar_siatki)]
 
         self.ustaw_miny(pusta_siatka, start, self.numer_min)
@@ -34,7 +34,7 @@ class Siatka:
         self.plansza = siatka
 
     # TODO: convert siatka -> self (if possible)
-    def Pokaz_Siatke(self, siatka):
+    def pokaz_plansze(self, siatka):
         poziomo = '   ' + (4 * self.rozmiar_siatki * '-') + '-'
 
         # Wypisz litery u gory 'a b c d e f g h i'
@@ -144,23 +144,23 @@ class Gra:
 
 
     def zagraj(self):
-        siatka_obiekt = Siatka()
+        siatka = Siatka()
 
-        rozmiar_siatki = siatka_obiekt.get_rozmiar_siatki()
-        numer_min = siatka_obiekt.get_numer_min()
+        rozmiar_siatki = siatka.get_rozmiar_siatki()
+        numer_min = siatka.get_numer_min()
 
-        obecna_siatka = [[' ' for i in range(rozmiar_siatki)] for i in range(rozmiar_siatki)]
+        plansza_widoczna_dla_gracza = [[' ' for i in range(rozmiar_siatki)] for i in range(rozmiar_siatki)]
 
         start_czasu = 0
 
         pomocna_wiadomosc = ("Wpisz kolumne a nastepnie numer rzedu (np. b1). "
                        "Aby postawic lub usunac flage, dodaj 'f' do komorki (np. b1f)")
 
-        siatka_obiekt.Pokaz_Siatke(obecna_siatka)
+        siatka.pokaz_plansze(plansza_widoczna_dla_gracza)
         print(pomocna_wiadomosc + " Wpisz 'help' aby pokazac ta wiadomosc ponownie.\n")
 
         while True:
-            pozostalo_min = numer_min - len(siatka_obiekt.flagi)
+            pozostalo_min = numer_min - len(siatka.flagi)
             komenda_popros = input('Podaj komorke ({} min zostalo): '.format(pozostalo_min))
 
             wynik = self.parsuj_dane_wejsciowe(komenda_popros, rozmiar_siatki, pomocna_wiadomosc + '\n')
@@ -171,51 +171,51 @@ class Gra:
             if komorka:
                 print('\n\n')
                 numer_rzedu, numer_kolumny = komorka
-                obecna_komorka = obecna_siatka[numer_rzedu][numer_kolumny]
+                obecna_komorka = plansza_widoczna_dla_gracza[numer_rzedu][numer_kolumny]
                 flaga = wynik['flaga']
 
-                if not siatka_obiekt.plansza:
-                    siatka_obiekt.Ustaw_Siatke(komorka)
+                if not siatka.plansza:
+                    siatka.stworz_plansze(komorka)
                 if not start_czasu:
                     start_czasu = time.time()
 
                 if flaga:
                     # Dodaj flage jesli komorka jest pusta
                     if obecna_komorka == ' ':
-                        obecna_siatka[numer_rzedu][numer_kolumny] = 'F'
-                        siatka_obiekt.flagi.append(komorka)
+                        plansza_widoczna_dla_gracza[numer_rzedu][numer_kolumny] = 'F'
+                        siatka.flagi.append(komorka)
                     # Usun flage jesli flaga jest juz ustawiona
                     elif obecna_komorka == 'F':
-                        obecna_siatka[numer_rzedu][numer_kolumny] = ' '
-                        siatka_obiekt.flagi.remove(komorka)
+                        plansza_widoczna_dla_gracza[numer_rzedu][numer_kolumny] = ' '
+                        siatka.flagi.remove(komorka)
                     else:
                         wiadomosc = 'Nie mozna wstawic tu flagi'
 
                 # Jesli jest tu flaga, pokaz wiadomosc
-                elif komorka in siatka_obiekt.flagi:
+                elif komorka in siatka.flagi:
                     wiadomosc = 'Tu jest flaga'
 
-                elif siatka_obiekt.plansza[numer_rzedu][numer_kolumny] == 'X':
+                elif siatka.plansza[numer_rzedu][numer_kolumny] == 'X':
                     print('Przegrales.\n')
-                    siatka_obiekt.Pokaz_Siatke(siatka_obiekt.plansza)
+                    siatka.pokaz_plansze(siatka.plansza)
                     return
 
                 elif obecna_komorka == ' ':
-                    siatka_obiekt.pokaz_komorki(siatka_obiekt.plansza, obecna_siatka, numer_rzedu, numer_kolumny)
+                    siatka.pokaz_komorki(siatka.plansza, plansza_widoczna_dla_gracza, numer_rzedu, numer_kolumny)
 
                 else:
                     wiadomosc = "Ta komorka jest juz odkryta"
 
-                if set(siatka_obiekt.flagi) == set(siatka_obiekt.miny):
+                if set(siatka.flagi) == set(siatka.miny):
                     minutes, seconds = divmod(int(time.time() - start_czasu), 60)
                     print(
                         'Wygales! '
                         'Trwalo to {} minut and {} sekund.\n'.format(minutes,
                                                                           seconds))
-                    siatka_obiekt.Pokaz_Siatke(siatka_obiekt.plansza)
+                    siatka.pokaz_plansze(siatka.plansza)
                     return
 
-            siatka_obiekt.Pokaz_Siatke(obecna_siatka)
+            siatka.pokaz_plansze(plansza_widoczna_dla_gracza)
             print(wiadomosc)
 
 
